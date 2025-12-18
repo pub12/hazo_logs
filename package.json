@@ -8,19 +8,23 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
     },
     "./ui": {
       "types": "./dist/ui/index.d.ts",
-      "import": "./dist/ui/index.js"
+      "import": "./dist/ui/index.js",
+      "require": "./dist/ui/index.js"
     },
     "./ui/server": {
       "types": "./dist/ui/server.d.ts",
-      "import": "./dist/ui/server.js"
+      "import": "./dist/ui/server.js",
+      "require": "./dist/ui/server.js"
     },
     "./tailwind": {
       "types": "./dist/tailwind.d.ts",
-      "import": "./dist/tailwind.js"
+      "import": "./dist/tailwind.js",
+      "require": "./dist/tailwind.js"
     }
   },
   "files": [
