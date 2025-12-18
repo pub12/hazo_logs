@@ -1,0 +1,29 @@
+{
+  "name": "hazo-logs-test-app",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "generate-logs": "tsx src/scripts/generate-logs.ts"
+  },
+  "dependencies": {
+    "hazo_logs": "file:../hazo_logs-1.0.0.tgz",
+    "hazo_ui": "file:../../hazo_ui/hazo_ui/hazo_ui-2.2.5.tgz",
+    "next": "^16.0.10",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.0.1",
+    "@types/react-dom": "^19.0.1",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.17",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}

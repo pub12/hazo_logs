@@ -1,0 +1,18 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+.next/
+out/
+
+# Logs
+logs/
+
+# Environment
+.env
+.env.local
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts

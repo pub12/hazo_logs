@@ -1,0 +1,20 @@
+# Exclude test app to prevent circular dependency when using file:.. reference
+test-app/
+
+# Development files
+node_modules/
+.git/
+.gitignore
+*.log
+coverage/
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Source files (only publish dist)
+src/
+tsconfig.json
+tsconfig.build.json
+vitest.config.ts

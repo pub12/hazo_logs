@@ -1,0 +1,81 @@
+{
+  "name": "hazo_logs",
+  "version": "1.0.0",
+  "description": "Logger for hazo packages - Winston wrapper with singleton pattern",
+  "type": "module",
+  "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./ui": {
+      "types": "./dist/ui/index.d.ts",
+      "import": "./dist/ui/index.js"
+    },
+    "./ui/server": {
+      "types": "./dist/ui/server.d.ts",
+      "import": "./dist/ui/server.js"
+    }
+  },
+  "files": [
+    "dist",
+    "hazo_logs_config.example.ini"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "dev:test-app": "npm run build && npm pack && cd test-app && npm install && npm run dev",
+    "prepublishOnly": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pub12/hazo_logs.git"
+  },
+  "keywords": [
+    "logs",
+    "logger",
+    "winston",
+    "hazo",
+    "log-viewer"
+  ],
+  "author": "Pubs Abayasiri",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/pub12/hazo_logs/issues"
+  },
+  "homepage": "https://github.com/pub12/hazo_logs#readme",
+  "dependencies": {
+    "ini": "^4.1.0",
+    "winston": "^3.17.0",
+    "winston-daily-rotate-file": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/ini": "^4.1.1",
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.0.1",
+    "hazo_ui": "file:../hazo_ui/hazo_ui",
+    "next": "^15.1.0",
+    "react": "^19.0.0",
+    "typescript": "^5.7.2",
+    "vitest": "^4.0.15"
+  },
+  "peerDependencies": {
+    "hazo_ui": ">=2.0.0",
+    "next": ">=14.0.0",
+    "react": ">=18.0.0"
+  },
+  "peerDependenciesMeta": {
+    "next": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    },
+    "hazo_ui": {
+      "optional": true
+    }
+  }
+}
