@@ -1,10 +1,10 @@
 {
   "name": "hazo_logs",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Logger for hazo packages - Winston wrapper with singleton pattern",
   "type": "module",
   "main": "dist/index.js",
-    "types": "dist/index.d.ts",
+  "types": "dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
