@@ -20,7 +20,12 @@ export function loadConfig(configPath?: string): HazoLogConfig {
   const resolvedPath = configPath || findConfigFile();
 
   if (!resolvedPath || !fs.existsSync(resolvedPath)) {
-    console.warn(`[HazoLog] Config file not found, using defaults`);
+    const searchPaths = getSearchPaths();
+    console.warn(
+      `[HazoLog] Config file '${CONFIG_FILENAME}' not found. Using defaults.\n` +
+      `  Searched in:\n${searchPaths.map(p => `    - ${p}`).join('\n')}\n` +
+      `  To configure, create '${CONFIG_FILENAME}' in your project root.`
+    );
     return { ...DEFAULT_CONFIG };
   }
 
@@ -49,15 +54,22 @@ export function loadConfig(configPath?: string): HazoLogConfig {
 }
 
 /**
- * Search for config file in current directory and parent directories
+ * Get the list of paths to search for config file
  */
-function findConfigFile(): string | null {
-  const searchPaths = [
+function getSearchPaths(): string[] {
+  return [
     process.cwd(),
     path.join(process.cwd(), '..'),
     path.join(process.cwd(), '..', '..'),
     path.join(process.cwd(), '..', '..', '..'),
   ];
+}
+
+/**
+ * Search for config file in current directory and parent directories
+ */
+function findConfigFile(): string | null {
+  const searchPaths = getSearchPaths();
 
   for (const searchPath of searchPaths) {
     const configPath = path.join(searchPath, CONFIG_FILENAME);

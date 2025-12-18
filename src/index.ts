@@ -1,6 +1,10 @@
 /**
  * hazo_logs - Winston logger wrapper with singleton pattern
  *
+ * ⚠️ SERVER-ONLY: This module uses Node.js APIs (fs, async_hooks) and CANNOT be
+ * imported in client components. For client-side logging, use:
+ *   import { createClientLogger } from 'hazo_logs/ui';
+ *
  * Usage:
  *   import { createLogger, runWithLogContext } from 'hazo_logs';
  *
@@ -15,7 +19,8 @@
  *   });
  *
  * For UI components (requires Next.js, React, and hazo_ui):
- *   import { LogViewerPage, createLogApiHandler } from 'hazo_logs/ui';
+ *   import { LogViewerPage } from 'hazo_logs/ui';
+ *   import { createLogApiHandler } from 'hazo_logs/ui/server';
  */
 
 // Core logging

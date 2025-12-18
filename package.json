@@ -17,6 +17,10 @@
     "./ui/server": {
       "types": "./dist/ui/server.d.ts",
       "import": "./dist/ui/server.js"
+    },
+    "./tailwind": {
+      "types": "./dist/tailwind.d.ts",
+      "import": "./dist/tailwind.js"
     }
   },
   "files": [

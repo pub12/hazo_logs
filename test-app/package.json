@@ -10,7 +10,7 @@
     "generate-logs": "tsx src/scripts/generate-logs.ts"
   },
   "dependencies": {
-    "hazo_logs": "file:../hazo_logs-1.0.0.tgz",
+    "hazo_logs": "file:../hazo_logs-1.0.1.tgz",
     "hazo_ui": "file:../../hazo_ui/hazo_ui/hazo_ui-2.2.5.tgz",
     "next": "^16.0.10",
     "react": "^19.0.0",

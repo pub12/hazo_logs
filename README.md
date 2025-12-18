@@ -86,7 +86,90 @@ export default function LogsPage() {
 }
 ```
 
+**3. Configure Tailwind CSS** (`tailwind.config.ts`):
+
+```typescript
+import type { Config } from 'tailwindcss';
+import { tailwindSafelist, tailwindContentPath } from 'hazo_logs/tailwind';
+
+const config: Config = {
+  content: [
+    './src/**/*.{js,ts,jsx,tsx,mdx}',
+    './app/**/*.{js,ts,jsx,tsx,mdx}',
+    tailwindContentPath, // Add hazo_logs components
+  ],
+  safelist: tailwindSafelist, // Prevent purging of dynamic classes
+  // ... rest of your config
+};
+
+export default config;
+```
+
 Visit `/logs` in your app to view logs!
+
+### Client-Side Logging (Browser)
+
+For logging from client components (browser), use the client logger:
+
+```typescript
+'use client';
+import { createClientLogger } from 'hazo_logs/ui';
+
+const logger = createClientLogger({
+  packageName: 'my-app-client',
+  apiBasePath: '/api/logs',
+});
+
+logger.info('User clicked button', { buttonId: 'submit' });
+logger.error('Failed to load data', { error: err.message });
+```
+
+## Important Notes
+
+### Server-Only Core Logger
+
+The main `hazo_logs` import uses Node.js APIs (`fs`, `async_hooks`) and **cannot be imported in client components**. If you try to import it in a client component, you'll get build errors.
+
+```typescript
+// Server components, API routes, middleware - OK
+import { createLogger } from 'hazo_logs';
+
+// Client components - use client logger instead
+import { createClientLogger } from 'hazo_logs/ui';
+```
+
+### Tailwind CSS Setup Required
+
+The log viewer UI uses dynamic Tailwind classes that would be purged during build. You **must** configure both:
+
+1. **Content path**: So Tailwind scans the hazo_logs component files
+2. **Safelist**: To preserve dynamically-constructed classes
+
+```typescript
+import { tailwindSafelist, tailwindContentPath } from 'hazo_logs/tailwind';
+
+export default {
+  content: [
+    // your paths...
+    tailwindContentPath,
+  ],
+  safelist: tailwindSafelist,
+};
+```
+
+Alternatively, use the preset:
+
+```typescript
+import { hazoLogsPreset } from 'hazo_logs/tailwind';
+
+export default {
+  presets: [hazoLogsPreset],
+  content: [
+    // your paths...
+    './node_modules/hazo_logs/dist/**/*.{js,jsx}',
+  ],
+};
+```
 
 ## Advanced Usage
 
@@ -324,6 +407,41 @@ Visualize logs grouped by package or session with hierarchical depth display.
 ## Examples
 
 See the `test-app/` directory for a complete working example.
+
+## Troubleshooting
+
+### Config file not found
+
+If you see `[HazoLog] Config file 'hazo_logs_config.ini' not found`, the library will still work with defaults. The warning shows the paths that were searched. Create the config file in your project root if you need custom settings.
+
+### Logs not appearing in UI
+
+1. Check that you're looking at the correct date (UI defaults to today)
+2. Verify logs are being written to the `log_directory` configured
+3. Check browser console for API errors
+
+### Styles broken in log viewer
+
+1. Ensure `tailwindContentPath` is in your Tailwind `content` array
+2. Ensure `tailwindSafelist` is in your Tailwind `safelist` array
+3. Rebuild your project after config changes (`npm run build`)
+
+### Import errors in client components
+
+```
+Error: fs is not defined
+Error: async_hooks is not defined
+```
+
+The core `hazo_logs` import is server-only. Use `createClientLogger` from `hazo_logs/ui` for browser logging.
+
+### hazo_ui missing errors
+
+The log viewer UI requires `hazo_ui` package. Install it:
+
+```bash
+npm install hazo_ui
+```
 
 ## Contributing
 
