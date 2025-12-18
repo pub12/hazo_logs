@@ -13,6 +13,11 @@ export type LogLevel = 'error' | 'warn' | 'info' | 'debug';
 export type LogData = Record<string, unknown>;
 
 /**
+ * Log source - where the log originated from
+ */
+export type LogSource = 'server' | 'client';
+
+/**
  * Log entry structure written to JSON files
  */
 export interface LogEntry {
@@ -27,6 +32,8 @@ export interface LogEntry {
   reference?: string;
   depth?: number;
   data?: LogData;
+  /** Source of the log entry (server or client) */
+  source?: LogSource;
 }
 
 /**

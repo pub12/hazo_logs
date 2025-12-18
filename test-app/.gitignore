@@ -6,8 +6,8 @@ dist/
 .next/
 out/
 
-# Logs
-logs/
+# Logs (root logs directory only, not app routes)
+/logs/
 
 # Environment
 .env

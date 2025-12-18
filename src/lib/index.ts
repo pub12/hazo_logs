@@ -7,6 +7,7 @@ export type {
   LogLevel,
   LogData,
   LogEntry,
+  LogSource,
   HazoLogConfig,
   PackageLoggerOptions,
 } from './types.js';

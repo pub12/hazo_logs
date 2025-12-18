@@ -29,6 +29,7 @@ export interface LogApiConfig {
  */
 export interface LogApiHandler {
   GET: (request: Request) => Promise<Response>;
+  POST: (request: Request) => Promise<Response>;
 }
 
 /**
@@ -54,6 +55,11 @@ export interface LogTableProps {
 }
 
 /**
+ * Log source - where the log originated from
+ */
+export type LogSource = 'server' | 'client';
+
+/**
  * Extended log entry with display-specific fields
  */
 export interface LogEntryDisplay {
@@ -68,6 +74,8 @@ export interface LogEntryDisplay {
   reference?: string;
   depth?: number;
   data?: Record<string, unknown>;
+  /** Source of the log entry (server or client) */
+  source?: LogSource;
 }
 
 /**

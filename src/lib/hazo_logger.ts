@@ -63,6 +63,22 @@ export class HazoLogger {
   }
 
   /**
+   * Log a client-side entry - called by API handler
+   * Used for logs sent from the browser
+   */
+  public logClient(entry: Omit<LogEntry, 'executionId' | 'filename' | 'line'>): void {
+    const fullEntry: LogEntry = {
+      ...entry,
+      executionId: this.executionId,
+      filename: 'client',
+      line: 0,
+      source: 'client',
+    };
+    const { level, message, ...meta } = fullEntry;
+    this.winstonLogger.log(level, message, meta);
+  }
+
+  /**
    * Get current configuration
    */
   public getConfig(): HazoLogConfig {

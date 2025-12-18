@@ -51,6 +51,9 @@ export function LogTable({ logs, isLoading = false }: LogTableProps) {
         <thead className="bg-gray-50">
           <tr>
             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Source
+            </th>
+            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Context
             </th>
             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -76,9 +79,22 @@ export function LogTable({ logs, isLoading = false }: LogTableProps) {
               <tr
                 className={`hover:bg-gray-50 ${
                   hasExpandableContent(log) ? 'cursor-pointer' : ''
-                } ${expandedRow === index ? 'bg-gray-50' : ''}`}
+                } ${expandedRow === index ? 'bg-gray-50' : ''} ${
+                  log.source === 'client' ? 'bg-purple-50/50' : ''
+                }`}
                 onClick={() => hasExpandableContent(log) && toggleRow(index)}
               >
+                <td className="px-4 py-3 whitespace-nowrap">
+                  {log.source === 'client' ? (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">
+                      Client
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700">
+                      Server
+                    </span>
+                  )}
+                </td>
                 <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 font-mono">
                   <span title={log.executionId}>{shortenId(log.executionId)}</span>
                   {log.sessionId && (
@@ -115,8 +131,21 @@ export function LogTable({ logs, isLoading = false }: LogTableProps) {
               </tr>
               {expandedRow === index && hasExpandableContent(log) && (
                 <tr>
-                  <td colSpan={6} className="px-4 py-3 bg-gray-50">
+                  <td colSpan={7} className="px-4 py-3 bg-gray-50">
                     <div className="space-y-2">
+                      {/* Source indicator for client logs */}
+                      {log.source === 'client' && (
+                        <div className="flex items-center gap-2 text-xs">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded font-medium bg-purple-100 text-purple-800">
+                            Client-side Log
+                          </span>
+                          {typeof log.data?.url === 'string' && (
+                            <span className="text-gray-500">
+                              from: <span className="font-mono text-purple-700">{log.data.url}</span>
+                            </span>
+                          )}
+                        </div>
+                      )}
                       {/* Context info */}
                       <div className="flex flex-wrap gap-4 text-xs">
                         <div>
@@ -136,6 +165,13 @@ export function LogTable({ logs, isLoading = false }: LogTableProps) {
                           </div>
                         )}
                       </div>
+                      {/* Client browser info */}
+                      {log.source === 'client' && typeof log.data?.userAgent === 'string' && (
+                        <div className="text-xs">
+                          <span className="text-gray-500">User Agent:</span>{' '}
+                          <span className="font-mono text-gray-600">{log.data.userAgent}</span>
+                        </div>
+                      )}
                       {/* Data */}
                       {log.data && (
                         <div>

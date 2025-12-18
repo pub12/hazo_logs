@@ -104,6 +104,15 @@ export function LogTimeline({
     }
   };
 
+  const getDotStyle = (log: LogEntryDisplay) => {
+    const baseColor = getDotColor(log.level);
+    // Client logs get a ring to distinguish them
+    if (log.source === 'client') {
+      return `${baseColor} ring-2 ring-purple-400 ring-offset-1`;
+    }
+    return baseColor;
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -200,7 +209,7 @@ export function LogTimeline({
                     >
                       {/* Timeline dot */}
                       <div
-                        className={`absolute w-4 h-4 rounded-full border-2 border-white shadow ${getDotColor(log.level)}`}
+                        className={`absolute w-4 h-4 rounded-full border-2 border-white shadow ${getDotStyle(log)}`}
                         style={{ left: indentation - 32 }}
                       />
 
@@ -217,6 +226,16 @@ export function LogTimeline({
                         {/* Header row */}
                         <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
                           <div className="flex items-center gap-2 flex-wrap">
+                            {/* Client/Server source badge */}
+                            {log.source === 'client' ? (
+                              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">
+                                Client
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700">
+                                Server
+                              </span>
+                            )}
                             <LogLevelBadge level={log.level} />
                             {!groupByPackage && (
                               <span className="text-sm font-medium text-gray-900">{log.package}</span>
@@ -247,6 +266,12 @@ export function LogTimeline({
                           {log.reference && (
                             <span className="bg-green-50 text-green-700 px-2 py-0.5 rounded border border-green-200">
                               Ref: {log.reference}
+                            </span>
+                          )}
+                          {/* Client URL for client-side logs */}
+                          {log.source === 'client' && typeof log.data?.url === 'string' && (
+                            <span className="bg-purple-50 text-purple-700 px-2 py-0.5 rounded border border-purple-200 max-w-xs truncate">
+                              URL: {log.data.url}
                             </span>
                           )}
                           <span className="bg-gray-50 text-gray-600 px-2 py-0.5 rounded border border-gray-200">

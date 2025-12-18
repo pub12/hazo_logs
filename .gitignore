@@ -4,8 +4,8 @@ node_modules/
 # Build output
 dist/
 
-# Logs
-logs/
+# Logs (root logs directory only, not app routes)
+/logs/
 *.log
 
 # Test coverage

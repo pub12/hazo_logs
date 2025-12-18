@@ -11,8 +11,25 @@ import {
   getUniqueReferences,
 } from '../../lib/log-reader.js';
 import { loadConfig } from '../../lib/config_loader.js';
+import { HazoLogger } from '../../lib/hazo_logger.js';
 import type { LogLevel } from '../../lib/types.js';
 import type { LogApiConfig, LogApiHandler } from '../types.js';
+
+/**
+ * Client log entry received from browser
+ */
+interface ClientLogPayload {
+  level: LogLevel;
+  message: string;
+  package: string;
+  timestamp: string;
+  source: 'client';
+  sessionId?: string;
+  reference?: string;
+  data?: Record<string, unknown>;
+  userAgent?: string;
+  url?: string;
+}
 
 /**
  * Helper to create JSON responses (compatible with Next.js Response)
@@ -28,7 +45,7 @@ function jsonResponse(data: unknown, status = 200): Response {
  * Create a Next.js API route handler for log queries
  *
  * @param config - Optional configuration
- * @returns Handler object with GET method
+ * @returns Handler object with GET and POST methods
  *
  * @example
  * ```typescript
@@ -36,7 +53,7 @@ function jsonResponse(data: unknown, status = 200): Response {
  * import { createLogApiHandler } from 'hazo_logs';
  *
  * const handler = createLogApiHandler();
- * export const { GET } = handler;
+ * export const { GET, POST } = handler;
  * ```
  */
 export function createLogApiHandler(config?: LogApiConfig): LogApiHandler {
@@ -70,6 +87,60 @@ export function createLogApiHandler(config?: LogApiConfig): LogApiHandler {
           default:
             return handleGetLogs(logDirectory, searchParams);
         }
+      } catch (error) {
+        console.error('[HazoLog] API error:', error);
+        return jsonResponse({ error: 'Internal Server Error', message: String(error) }, 500);
+      }
+    },
+
+    POST: async (request: Request): Promise<Response> => {
+      const hazoConfig = loadConfig();
+
+      // Check if log viewer is enabled (also controls client logging)
+      if (!hazoConfig.enable_log_viewer) {
+        return jsonResponse({ error: 'Log viewer is disabled' }, 403);
+      }
+
+      try {
+        const body = await request.json() as { logs?: ClientLogPayload[] };
+
+        if (!body.logs || !Array.isArray(body.logs)) {
+          return jsonResponse({ error: 'Invalid request: logs array required' }, 400);
+        }
+
+        const logger = HazoLogger.getInstance();
+        let loggedCount = 0;
+
+        for (const log of body.logs) {
+          // Validate required fields
+          if (!log.level || !log.message || !log.package) {
+            continue;
+          }
+
+          // Validate log level
+          if (!['error', 'warn', 'info', 'debug'].includes(log.level)) {
+            continue;
+          }
+
+          // Log the client entry
+          logger.logClient({
+            timestamp: log.timestamp || new Date().toISOString(),
+            level: log.level,
+            package: log.package,
+            message: log.message,
+            sessionId: log.sessionId,
+            reference: log.reference,
+            data: {
+              ...log.data,
+              userAgent: log.userAgent,
+              url: log.url,
+            },
+            source: 'client',
+          });
+          loggedCount++;
+        }
+
+        return jsonResponse({ success: true, logged: loggedCount });
       } catch (error) {
         console.error('[HazoLog] API error:', error);
         return jsonResponse({ error: 'Internal Server Error', message: String(error) }, 500);

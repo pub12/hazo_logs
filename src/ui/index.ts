@@ -11,6 +11,10 @@ export { LogTimeline } from './components/LogTimeline.js';
 export { LogPagination } from './components/LogPagination.js';
 export { LogLevelBadge } from './components/LogLevelBadge.js';
 
+// Client Logger
+export { createClientLogger } from './client-logger.js';
+export type { ClientLogger, ClientLoggerConfig, ClientLogLevel } from './client-logger.js';
+
 // Types
 export type {
   LogViewerPageProps,
@@ -25,4 +29,5 @@ export type {
   LogQueryResponse,
   LogDatesResponse,
   LogPackagesResponse,
+  LogSource,
 } from './types.js';

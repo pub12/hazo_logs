@@ -37,26 +37,32 @@ export function withLogAuth(
   handler: LogApiHandler,
   authCheck: AuthCheckFn
 ): LogApiHandler {
-  return {
-    GET: async (request: Request): Promise<Response> => {
-      try {
-        const isAuthorized = await authCheck(request);
+  const wrapWithAuth = async (
+    request: Request,
+    handlerFn: (request: Request) => Promise<Response>
+  ): Promise<Response> => {
+    try {
+      const isAuthorized = await authCheck(request);
 
-        if (!isAuthorized) {
-          return jsonResponse(
-            { error: 'Unauthorized', message: 'Access to logs requires authentication' },
-            401
-          );
-        }
-
-        return handler.GET(request);
-      } catch (error) {
-        console.error('[HazoLog] Auth check failed:', error);
+      if (!isAuthorized) {
         return jsonResponse(
-          { error: 'Internal Server Error', message: 'Authentication check failed' },
-          500
+          { error: 'Unauthorized', message: 'Access to logs requires authentication' },
+          401
         );
       }
-    },
+
+      return handlerFn(request);
+    } catch (error) {
+      console.error('[HazoLog] Auth check failed:', error);
+      return jsonResponse(
+        { error: 'Internal Server Error', message: 'Authentication check failed' },
+        500
+      );
+    }
+  };
+
+  return {
+    GET: (request: Request) => wrapWithAuth(request, handler.GET),
+    POST: (request: Request) => wrapWithAuth(request, handler.POST),
   };
 }
