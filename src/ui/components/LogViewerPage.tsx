@@ -38,6 +38,9 @@ export function LogViewerPage({
   embedded = false,
   showHeader = true,
 }: LogViewerPageProps) {
+  // Hydration safety - prevent SSR mismatch with icons and date formatting
+  const [mounted, setMounted] = useState(false);
+
   // State
   const [logs, setLogs] = useState<LogEntryDisplay[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -209,6 +212,11 @@ export function LogViewerPage({
     }
   }, [apiBasePath, selectedDate, page, pageSize, filters, sorts]);
 
+  // Hydration safety - set mounted after client hydration
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   // Initial load
   useEffect(() => {
     fetchDates();
@@ -318,6 +326,38 @@ export function LogViewerPage({
   const contentClass = embedded
     ? 'flex-1 overflow-auto p-4'
     : 'px-4 sm:px-6 lg:px-8 py-6';
+
+  // Hydration safety - render loading skeleton during SSR to prevent mismatch
+  if (!mounted) {
+    return (
+      <div className={containerClass}>
+        {showHeader && (
+          <div className={headerClass}>
+            <div className={headerInnerClass}>
+              <div className="flex items-center justify-between flex-wrap gap-4">
+                <div className="h-8 w-32 bg-gray-200 rounded animate-pulse" />
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-32 bg-gray-200 rounded animate-pulse" />
+                  <div className="h-8 w-24 bg-gray-200 rounded animate-pulse" />
+                  <div className="h-8 w-24 bg-gray-200 rounded animate-pulse" />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        <div className={contentClass}>
+          <div className={embedded ? 'bg-white rounded-lg overflow-hidden border' : 'bg-white shadow rounded-lg overflow-hidden'}>
+            <div className="p-8">
+              <div className="flex items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+                <span className="ml-3 text-gray-600">Loading...</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={containerClass}>
