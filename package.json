@@ -64,7 +64,7 @@
     "@types/ini": "^4.1.1",
     "@types/node": "^22.10.2",
     "@types/react": "^19.0.1",
-    "hazo_ui": "file:../hazo_ui/hazo_ui",
+    "hazo_ui": "file:../hazo_ui",
     "next": "^15.1.0",
     "react": "^19.0.0",
     "typescript": "^5.7.2",
