@@ -1,6 +1,6 @@
 {
   "name": "hazo_logs",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Logger for hazo packages - Winston wrapper with singleton pattern",
   "type": "module",
   "main": "dist/index.js",
