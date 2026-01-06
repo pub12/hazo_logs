@@ -46,7 +46,14 @@ logger.debug('Debug information');
 
 **2. (Optional) Configure logging:**
 
-Create `hazo_logs_config.ini` in your project root:
+Create a `config/` directory and add `hazo_logs_config.ini`:
+
+```bash
+mkdir -p config
+cp node_modules/hazo_logs/config/hazo_logs_config.example.ini config/hazo_logs_config.ini
+```
+
+Or create `config/hazo_logs_config.ini` manually:
 
 ```ini
 [hazo_logs]
@@ -275,7 +282,14 @@ function CustomLogViewer() {
 
 ## Configuration Reference
 
-Create `hazo_logs_config.ini` in your project root:
+Create a `config/` directory in your project root and add `hazo_logs_config.ini`:
+
+```bash
+mkdir -p config
+cp node_modules/hazo_logs/config/hazo_logs_config.example.ini config/hazo_logs_config.ini
+```
+
+Configuration options:
 
 ```ini
 [hazo_logs]
@@ -412,7 +426,12 @@ See the `test-app/` directory for a complete working example.
 
 ### Config file not found
 
-If you see `[HazoLog] Config file 'hazo_logs_config.ini' not found`, the library will still work with defaults. The warning shows the paths that were searched. Create the config file in your project root if you need custom settings.
+If you see `[HazoLog] Config file 'config/hazo_logs_config.ini' not found`, the library will still work with defaults. The warning shows the paths that were searched. To configure custom settings:
+
+```bash
+mkdir -p config
+cp node_modules/hazo_logs/config/hazo_logs_config.example.ini config/hazo_logs_config.ini
+```
 
 ### Logs not appearing in UI
 

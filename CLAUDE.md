@@ -87,7 +87,8 @@ hazo_logs/
 │   │   └── types.ts            # UI type definitions
 │   └── index.ts                # Main entry point
 ├── dist/                       # Compiled output
-├── hazo_logs_config.example.ini
+├── config/
+│   └── hazo_logs_config.example.ini
 └── package.json
 ```
 
@@ -135,7 +136,7 @@ logger.info('Operation started', { userId: 123 });
 
 ## Common Gotchas
 
-1. **Config File Location**: Searches up 3 parent directories from `process.cwd()`. Place in project root.
+1. **Config File Location**: Searches up 3 parent directories from `process.cwd()`. Place in `config/hazo_logs_config.ini`.
 2. **UI Dependencies**: LogViewerPage requires `hazo_ui` package. Install peer deps if using UI.
 3. **Caller Info Accuracy**: Stack traces assume specific call depth. Custom wrappers may offset line numbers.
 4. **Date Filters**: UI defaults to today's date. Empty logs view may mean no logs for selected date.
@@ -161,7 +162,7 @@ logger.info('Operation started', { userId: 123 });
 
 ## Configuration Options
 
-All settings in `hazo_logs_config.ini` under `[hazo_logs]` section:
+All settings in `config/hazo_logs_config.ini` under `[hazo_logs]` section:
 
 **Core Logging**:
 - `log_directory` - Where to write logs (default: `./logs`)

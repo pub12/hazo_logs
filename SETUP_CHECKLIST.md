@@ -48,13 +48,19 @@ Expected output:
 
 Configuration is optional. hazo_logs works with defaults if no config file is provided.
 
-- [ ] Create `hazo_logs_config.ini` in your project root:
+- [ ] Create the `config/` directory in your project root:
 
 ```bash
-touch hazo_logs_config.ini
+mkdir -p config
 ```
 
-- [ ] Add configuration (copy from example below or use defaults):
+- [ ] Copy the example config file from the package:
+
+```bash
+cp node_modules/hazo_logs/config/hazo_logs_config.example.ini config/hazo_logs_config.ini
+```
+
+Or create `config/hazo_logs_config.ini` manually with your preferred settings:
 
 ```ini
 [hazo_logs]
@@ -93,7 +99,7 @@ log_viewer_max_results = 1000
 
 **Verification**: Check config file syntax:
 ```bash
-cat hazo_logs_config.ini
+cat config/hazo_logs_config.ini
 ```
 
 ---
@@ -459,7 +465,7 @@ export default function DashboardPage() {
 
 ### Step 13: Configure Log Retention
 
-- [ ] Update retention settings in `hazo_logs_config.ini`:
+- [ ] Update retention settings in `config/hazo_logs_config.ini`:
 
 ```ini
 [hazo_logs]

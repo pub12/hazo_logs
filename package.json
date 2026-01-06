@@ -29,7 +29,7 @@
   },
   "files": [
     "dist",
-    "hazo_logs_config.example.ini"
+    "config"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",

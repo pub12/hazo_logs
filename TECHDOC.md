@@ -156,7 +156,7 @@ function findConfigFile(): string | null {
   ];
 
   for (const searchPath of searchPaths) {
-    const configPath = path.join(searchPath, 'hazo_logs_config.ini');
+    const configPath = path.join(searchPath, 'config/hazo_logs_config.ini');
     if (fs.existsSync(configPath)) {
       return configPath;
     }
@@ -702,8 +702,9 @@ test('reads logs from file', async () => {
   const tempDir = fs.mkdtempSync('/tmp/hazo-test-');
 
   // Create test config
+  fs.mkdirSync(path.join(tempDir, 'config'), { recursive: true });
   fs.writeFileSync(
-    path.join(tempDir, 'hazo_logs_config.ini'),
+    path.join(tempDir, 'config/hazo_logs_config.ini'),
     '[hazo_logs]\nlog_directory = ' + tempDir
   );
 

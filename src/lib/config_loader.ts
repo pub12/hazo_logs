@@ -9,7 +9,7 @@ import ini from 'ini';
 import type { HazoLogConfig, LogLevel } from './types.js';
 import { DEFAULT_CONFIG } from './utils/constants.js';
 
-const CONFIG_FILENAME = 'hazo_logs_config.ini';
+const CONFIG_FILENAME = 'config/hazo_logs_config.ini';
 
 /**
  * Load configuration from INI file
