@@ -7,6 +7,13 @@
  * alongside server-side logs. All entries are marked with source: 'client'.
  */
 
+import {
+  getClientLoggerConfig,
+  isClientLoggerConfigured,
+  _markWarningShown,
+  _wasWarningShown,
+} from './client-config.js';
+
 export type ClientLogLevel = 'error' | 'warn' | 'info' | 'debug';
 
 export interface ClientLoggerConfig {
@@ -66,16 +73,33 @@ const LOG_LEVEL_PRIORITY: Record<ClientLogLevel, number> = {
  * ```
  */
 export function createClientLogger(config: ClientLoggerConfig = {}) {
+  const globalConfig = getClientLoggerConfig();
+
   const {
-    apiBasePath = '/api/logs',
+    apiBasePath = globalConfig?.apiBasePath ?? '/api/logs',
     packageName = 'client',
     sessionId,
     reference,
-    minLevel = 'debug',
-    consoleOutput = true,
-    batchMode = false,
-    batchInterval = 5000,
+    minLevel = globalConfig?.minLevel ?? 'debug',
+    consoleOutput = globalConfig?.consoleOutput ?? true,
+    batchMode = globalConfig?.batchMode ?? false,
+    batchInterval = globalConfig?.batchInterval ?? 5000,
   } = config;
+
+  // Warn once in development if using default without global config
+  if (
+    !config.apiBasePath &&
+    !isClientLoggerConfigured() &&
+    !_wasWarningShown() &&
+    typeof window !== 'undefined' &&
+    process.env.NODE_ENV === 'development'
+  ) {
+    _markWarningShown();
+    console.warn(
+      '[HazoLog] Client logger using default /api/logs. ' +
+        'Call configureClientLogger({ apiBasePath: "..." }) at app init to set a custom endpoint.'
+    );
+  }
 
   let logBatch: ClientLogEntry[] = [];
   let batchTimer: ReturnType<typeof setTimeout> | null = null;

@@ -15,6 +15,15 @@ export { LogLevelBadge } from './components/LogLevelBadge.js';
 export { createClientLogger } from './client-logger.js';
 export type { ClientLogger, ClientLoggerConfig, ClientLogLevel } from './client-logger.js';
 
+// Client Configuration (global defaults)
+export {
+  configureClientLogger,
+  getClientLoggerConfig,
+  isClientLoggerConfigured,
+  resetClientLoggerConfig,
+} from './client-config.js';
+export type { ClientLoggerGlobalConfig } from './client-config.js';
+
 // Types
 export type {
   LogViewerPageProps,

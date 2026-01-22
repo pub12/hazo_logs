@@ -102,7 +102,21 @@ export function createLogApiHandler(config?: LogApiConfig): LogApiHandler {
       }
 
       try {
-        const body = await request.json() as { logs?: ClientLogPayload[] };
+        // Read body as text first to handle empty bodies gracefully
+        const text = await request.text();
+
+        // Guard against empty body (can happen with sendBeacon on page unload)
+        if (!text || text.trim() === '') {
+          return jsonResponse({ error: 'Empty request body' }, 400);
+        }
+
+        let body: { logs?: ClientLogPayload[] };
+        try {
+          body = JSON.parse(text);
+        } catch (parseError) {
+          console.error('[HazoLog] Invalid JSON in request body:', parseError);
+          return jsonResponse({ error: 'Invalid JSON in request body' }, 400);
+        }
 
         if (!body.logs || !Array.isArray(body.logs)) {
           return jsonResponse({ error: 'Invalid request: logs array required' }, 400);
