@@ -78,7 +78,8 @@ import { createLogApiHandler } from 'hazo_logs/ui/server';
 
 const handler = createLogApiHandler();
 
-export const { GET } = handler;
+// GET for log viewer, POST for client-side logging
+export const { GET, POST } = handler;
 ```
 
 **2. Create UI page** (`app/logs/page.tsx`):
@@ -116,20 +117,44 @@ Visit `/logs` in your app to view logs!
 
 ### Client-Side Logging (Browser)
 
-For logging from client components (browser), use the client logger:
+For logging from client components (browser), use the client logger.
+
+**1. Configure global defaults (recommended):**
+
+Set up global configuration once at app initialization. This ensures all client loggers (including those from dependency packages) use the correct API endpoint:
+
+```typescript
+// app/providers.tsx or lib/hazo-init.ts
+'use client';
+import { configureClientLogger } from 'hazo_logs/ui';
+
+// Configure once at app startup
+configureClientLogger({
+  apiBasePath: '/api/logs',  // Required: your log API endpoint
+  minLevel: 'info',          // Optional: minimum log level
+});
+```
+
+**2. Create loggers in your components:**
 
 ```typescript
 'use client';
 import { createClientLogger } from 'hazo_logs/ui';
 
+// No need to specify apiBasePath - inherits from global config
 const logger = createClientLogger({
   packageName: 'my-app-client',
-  apiBasePath: '/api/logs',
 });
 
 logger.info('User clicked button', { buttonId: 'submit' });
 logger.error('Failed to load data', { error: err.message });
 ```
+
+**Why use global configuration?**
+
+- Dependency packages (like `hazo_collab_forms`) automatically use your configured endpoint
+- Avoids 404 errors from loggers using the wrong default path
+- Single place to configure all client logging settings
 
 ## Important Notes
 
@@ -344,6 +369,40 @@ Read logs from files with filtering and pagination (server-side only).
 
 ### UI Exports (`hazo_logs/ui`)
 
+#### `configureClientLogger(config: ClientLoggerGlobalConfig): void`
+
+Configure global defaults for all client loggers. Call once at app initialization.
+
+```typescript
+configureClientLogger({
+  apiBasePath: '/api/logs',  // Required
+  minLevel: 'info',          // Optional
+  consoleOutput: true,       // Optional
+  batchMode: false,          // Optional
+  batchInterval: 5000,       // Optional (ms)
+});
+```
+
+#### `getClientLoggerConfig(): ClientLoggerGlobalConfig | undefined`
+
+Get current global configuration (returns undefined if not configured).
+
+#### `isClientLoggerConfigured(): boolean`
+
+Check if global configuration has been set.
+
+#### `createClientLogger(config?: ClientLoggerConfig): ClientLogger`
+
+Create a client-side logger. Inherits from global config if set.
+
+```typescript
+const logger = createClientLogger({
+  packageName: 'my-component',  // Tag for this logger
+  sessionId: 'sess_123',        // Optional session tracking
+  reference: 'user_456',        // Optional reference tracking
+});
+```
+
 #### `LogViewerPage`
 
 Main log viewer component.
@@ -374,7 +433,8 @@ Create Next.js API route handler.
 **Returns:**
 ```typescript
 {
-  GET: (request: Request) => Promise<Response>
+  GET: (request: Request) => Promise<Response>,  // Log viewer queries
+  POST: (request: Request) => Promise<Response>, // Client-side log ingestion
 }
 ```
 
@@ -461,6 +521,24 @@ The log viewer UI requires `hazo_ui` package. Install it:
 ```bash
 npm install hazo_ui
 ```
+
+### POST /api/logs 404 errors
+
+If you see repeated `POST /api/logs 404` errors, client loggers are using the default endpoint which doesn't match your API route location.
+
+**Solution**: Configure the global client logger at app startup:
+
+```typescript
+// app/providers.tsx or lib/hazo-init.ts
+'use client';
+import { configureClientLogger } from 'hazo_logs/ui';
+
+configureClientLogger({
+  apiBasePath: '/api/hazo_logs/logs',  // Match your actual route
+});
+```
+
+This ensures all client loggers (including those from dependency packages) use the correct endpoint.
 
 ## Contributing
 

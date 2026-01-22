@@ -238,8 +238,11 @@ import { createLogApiHandler } from 'hazo_logs/ui/server';
 
 const handler = createLogApiHandler();
 
-export const { GET } = handler;
+// GET for log viewer queries, POST for client-side logging
+export const { GET, POST } = handler;
 ```
+
+**Note**: Export both `GET` and `POST` if you plan to use client-side logging from the browser.
 
 **Verification**: Start your Next.js dev server and test the API:
 ```bash
@@ -369,6 +372,70 @@ curl http://localhost:3000/api/logs
 
 # With valid admin session, should return logs
 ```
+
+---
+
+### Step 10: Configure Client-Side Logging (If Using Browser Logging)
+
+If your application logs from client-side components (browser), configure global client logger settings.
+
+- [ ] Create a client initialization file or add to your providers:
+
+**Option A: Dedicated init file** (`lib/hazo-init.ts`):
+
+```typescript
+'use client';
+import { configureClientLogger } from 'hazo_logs/ui';
+
+// Configure once - all client loggers will inherit these settings
+configureClientLogger({
+  apiBasePath: '/api/logs',  // Must match your API route location
+  minLevel: 'info',          // Optional: minimum log level to send
+});
+```
+
+Then import this file early in your app (e.g., in `app/layout.tsx`):
+
+```typescript
+import '@/lib/hazo-init';
+```
+
+**Option B: In providers component** (`app/providers.tsx`):
+
+```typescript
+'use client';
+import { configureClientLogger } from 'hazo_logs/ui';
+
+// Configure on module load
+configureClientLogger({
+  apiBasePath: '/api/logs',
+});
+
+export function Providers({ children }: { children: React.ReactNode }) {
+  return <>{children}</>;
+}
+```
+
+- [ ] Create client loggers in your components:
+
+```typescript
+'use client';
+import { createClientLogger } from 'hazo_logs/ui';
+
+// No apiBasePath needed - inherits from global config
+const logger = createClientLogger({
+  packageName: 'my-component',
+});
+
+logger.info('Component mounted');
+```
+
+**Verification**:
+- Check browser console for log messages
+- Check server logs for client log entries (marked with `source: 'client'`)
+- No 404 errors for POST requests to log endpoint
+
+**Why this matters**: Without global configuration, client loggers default to `/api/logs`. If your API is at a different path (e.g., `/api/hazo_logs/logs`), you'll see 404 errors. Global config ensures all loggers—including those from dependency packages—use the correct endpoint.
 
 ---
 
@@ -750,6 +817,46 @@ docker-compose exec app ls -la /app/logs
 
 ---
 
+#### Issue: POST /api/logs 404 errors in console
+
+- [ ] **Check client logger global configuration**:
+  - Client loggers default to `/api/logs`
+  - If your API is at a different path, configure globally:
+
+  ```typescript
+  // lib/hazo-init.ts
+  'use client';
+  import { configureClientLogger } from 'hazo_logs/ui';
+
+  configureClientLogger({
+    apiBasePath: '/api/hazo_logs/logs',  // Match your actual route
+  });
+  ```
+
+- [ ] **Check that global config is loaded before loggers are created**:
+  - Import the init file early in your app layout
+  - Ensure `configureClientLogger()` runs before any `createClientLogger()` calls
+
+- [ ] **Check dependency packages**:
+  - Packages like `hazo_collab_forms` may create their own loggers
+  - Global config ensures they use the correct endpoint
+
+---
+
+#### Issue: "Invalid JSON in request body" or empty body errors
+
+- [ ] **Check client logger is sending valid data**:
+  - This usually indicates race conditions or page unload issues
+  - The API handler now gracefully handles empty/malformed requests
+  - Ensure you're on the latest version of hazo_logs
+
+- [ ] **Check network tab for request payload**:
+  - Open browser DevTools > Network
+  - Find POST request to your log endpoint
+  - Verify the request body contains valid JSON with `{ logs: [...] }`
+
+---
+
 ## Completion Checklist
 
 ### Core Logging (Minimum Setup)
@@ -768,6 +875,7 @@ docker-compose exec app ls -la /app/logs
 - [ ] Sorting works
 - [ ] Pagination works
 - [ ] Authentication configured (production)
+- [ ] Client logger global config set (if using browser logging)
 
 ### Production Deployment
 - [ ] Log directory configured for production
