@@ -158,17 +158,32 @@ logger.error('Failed to load data', { error: err.message });
 
 ## Important Notes
 
-### Server-Only Core Logger
+### Server/Client Import Paths
 
-The main `hazo_logs` import uses Node.js APIs (`fs`, `async_hooks`) and **cannot be imported in client components**. If you try to import it in a client component, you'll get build errors.
+hazo_logs provides different import paths for different environments:
+
+| Import Path | Environment | Use Case |
+|-------------|-------------|----------|
+| `hazo_logs` | Universal | Basic logging (console on client, file on server) |
+| `hazo_logs/server` | Server-only | Full logging with context, sessions, log reader |
+| `hazo_logs/ui` | Client | React components, `createClientLogger()` |
+| `hazo_logs/ui/server` | Server-only | API handlers for log viewer |
 
 ```typescript
-// Server components, API routes, middleware - OK
+// Universal - works everywhere (recommended for libraries)
 import { createLogger } from 'hazo_logs';
 
-// Client components - use client logger instead
+// Server-only - full capabilities (file logging, context, sessions)
+import { createLogger, runWithLogContext } from 'hazo_logs/server';
+
+// Client components - sends logs to server API
 import { createClientLogger } from 'hazo_logs/ui';
+
+// API routes - create log viewer endpoints
+import { createLogApiHandler } from 'hazo_logs/ui/server';
 ```
+
+**Note**: The `hazo_logs/server` and `hazo_logs/ui/server` imports use the `server-only` package and will throw an error if accidentally imported in client bundles. This prevents Next.js build errors from Node.js APIs (`fs`, `async_hooks`) being bundled for the browser.
 
 ### Tailwind CSS Setup Required
 
@@ -207,11 +222,10 @@ export default {
 
 ### Session and Reference Tracking
 
-Track logs across async operations:
+Track logs across async operations (server-only feature):
 
 ```typescript
-import { createLogger } from 'hazo_logs';
-import { runWithLogContext } from 'hazo_logs';
+import { createLogger, runWithLogContext } from 'hazo_logs/server';
 
 const logger = createLogger('auth');
 
@@ -508,11 +522,15 @@ cp node_modules/hazo_logs/config/hazo_logs_config.example.ini config/hazo_logs_c
 ### Import errors in client components
 
 ```
-Error: fs is not defined
-Error: async_hooks is not defined
+Error: Module not found: Can't resolve 'async_hooks'
+Error: Module not found: Can't resolve 'fs'
 ```
 
-The core `hazo_logs` import is server-only. Use `createClientLogger` from `hazo_logs/ui` for browser logging.
+This happens when server-only code is imported in client components. Solutions:
+
+1. **For logging in client components**: Use `createClientLogger` from `hazo_logs/ui`
+2. **For server-only modules**: Import from `hazo_logs/server` instead of `hazo_logs`
+3. **For universal code**: The base `hazo_logs` import now works on both client and server (returns console logger on client)
 
 ### hazo_ui missing errors
 

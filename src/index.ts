@@ -1,56 +1,47 @@
 /**
- * hazo_logs - Winston logger wrapper with singleton pattern
+ * hazo_logs - Universal logging library for hazo packages
  *
- * ⚠️ SERVER-ONLY: This module uses Node.js APIs (fs, async_hooks) and CANNOT be
- * imported in client components. For client-side logging, use:
- *   import { createClientLogger } from 'hazo_logs/ui';
+ * This root export is SAFE for both server and client environments.
  *
- * Usage:
- *   import { createLogger, runWithLogContext } from 'hazo_logs';
+ * ## Quick Start
  *
- *   const logger = createLogger('my_package');
+ * ```typescript
+ * import { createLogger } from 'hazo_logs';
  *
- *   // Basic logging
- *   logger.info('Hello world', { key: 'value' });
+ * const logger = createLogger('my_app');
+ * logger.info('Application started');
+ * ```
  *
- *   // With context (session/user tracking)
- *   runWithLogContext({ sessionId: 'sess_123', reference: 'user_42' }, () => {
- *     logger.info('User action'); // automatically includes sessionId and reference
- *   });
+ * ## Environment-Specific Imports
  *
- * For UI components (requires Next.js, React, and hazo_ui):
- *   import { LogViewerPage } from 'hazo_logs/ui';
- *   import { createLogApiHandler } from 'hazo_logs/ui/server';
+ * ### Server-Only (full capabilities)
+ * For file logging, AsyncLocalStorage context, log reading:
+ * ```typescript
+ * import { createLogger, runWithLogContext, readLogs } from 'hazo_logs/server';
+ * ```
+ *
+ * ### Client Components (sends logs to server API)
+ * For logging that persists to server:
+ * ```typescript
+ * import { createClientLogger } from 'hazo_logs/ui';
+ * ```
+ *
+ * ### UI Components (log viewer)
+ * ```typescript
+ * import { LogViewerPage } from 'hazo_logs/ui';
+ * import { createLogApiHandler } from 'hazo_logs/ui/server';
+ * ```
  */
 
-// Core logging
-export { HazoLogger } from './lib/hazo_logger.js';
-export { PackageLogger, createLogger } from './lib/package_logger.js';
-export { loadConfig } from './lib/config_loader.js';
-
-// Log context
+// Universal logger - works on both server and client
 export {
-  generateSessionId,
-  startSession,
-  startSessionAsync,
-  runWithLogContext,
-  runWithLogContextAsync,
-  getLogContext,
-  withSession,
-  withContext,
-} from './lib/context/log-context.js';
+  createLogger,
+  createLoggerAsync,
+  preloadServerLogger,
+  ConsoleLogger,
+} from './lib/universal-logger.js';
 
-// Log reader
-export {
-  readLogs,
-  getAvailableLogDates,
-  getUniquePackages,
-  getUniqueExecutionIds,
-  getUniqueSessionIds,
-  getUniqueReferences,
-} from './lib/log-reader.js';
-
-// Types
+// Types - always safe to export (stripped at build time)
 export type {
   Logger,
   LogLevel,
@@ -59,6 +50,5 @@ export type {
   LogContext,
   HazoLogConfig,
   PackageLoggerOptions,
+  LogSource,
 } from './lib/types.js';
-
-export type { ReadLogsOptions, LogQueryResult } from './lib/log-reader.js';

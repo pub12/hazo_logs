@@ -443,12 +443,13 @@ logger.info('Component mounted');
 
 ### Step 11: Session Tracking Setup (Optional)
 
-Use session tracking to group logs by user session or request.
+Use session tracking to group logs by user session or request. **Note**: Session tracking requires server-side imports.
 
 - [ ] Wrap request handlers with log context:
 
 ```typescript
-import { createLogger, runWithLogContext } from 'hazo_logs';
+// Use hazo_logs/server for full server capabilities
+import { createLogger, runWithLogContext } from 'hazo_logs/server';
 
 const logger = createLogger('api');
 
@@ -814,6 +815,30 @@ docker-compose exec app ls -la /app/logs
 - [ ] **Check source maps** (in production):
   - Source maps may not be available in production
   - Consider disabling caller info for production
+
+---
+
+#### Issue: "Module not found: Can't resolve 'async_hooks'" or "fs" errors
+
+- [ ] **Check import paths for client components**:
+  - The root `hazo_logs` import now works on both client and server
+  - For full server features, use `hazo_logs/server`
+  - For client components, use `hazo_logs/ui` for `createClientLogger`
+
+  ```typescript
+  // Universal - works everywhere (basic logging)
+  import { createLogger } from 'hazo_logs';
+
+  // Server-only - full capabilities
+  import { createLogger, runWithLogContext } from 'hazo_logs/server';
+
+  // Client components - browser logging
+  import { createClientLogger } from 'hazo_logs/ui';
+  ```
+
+- [ ] **Check for indirect imports**:
+  - If a dependency imports from `hazo_logs/server` in client code, it will fail
+  - Ensure server-only code paths use proper import separation
 
 ---
 
