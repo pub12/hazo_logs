@@ -1,12 +1,50 @@
 /**
  * Log Context Provider
  * Uses AsyncLocalStorage for zero-overhead context propagation
+ *
+ * This module is safe for both server and client environments.
+ * On the client, context functions are no-ops since AsyncLocalStorage is unavailable.
  */
 
-import { AsyncLocalStorage } from 'async_hooks';
 import type { LogContext, Logger } from '../types.js';
 
-const logContextStorage = new AsyncLocalStorage<LogContext>();
+// Type for the storage interface (either real AsyncLocalStorage or stub)
+interface LogContextStorage {
+  getStore(): LogContext | undefined;
+  run<T>(store: LogContext, fn: () => T): T;
+}
+
+// Client-side stub implementation
+const clientStubStorage: LogContextStorage = {
+  getStore: () => undefined,
+  run: <T>(_store: LogContext, fn: () => T): T => fn(),
+};
+
+// Runtime-initialized storage (populated on server, stub on client)
+let logContextStorage: LogContextStorage = clientStubStorage;
+let initialized = false;
+
+/**
+ * Initialize AsyncLocalStorage on the server
+ * This is called lazily when context functions are first used
+ */
+function ensureInitialized(): void {
+  if (initialized) return;
+  initialized = true;
+
+  // Only attempt to load async_hooks on the server
+  if (typeof window === 'undefined') {
+    try {
+      // Dynamic require to avoid static analysis by bundlers
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const asyncHooks = require('async_hooks') as typeof import('async_hooks');
+      logContextStorage = new asyncHooks.AsyncLocalStorage<LogContext>();
+    } catch {
+      // If async_hooks is not available, keep using the stub
+      console.warn('[hazo_logs] AsyncLocalStorage not available, context tracking disabled');
+    }
+  }
+}
 
 /**
  * Generate a human-readable session ID
@@ -34,6 +72,7 @@ export function startSession<T>(
   options: { reference?: string; logger?: Logger },
   fn: () => T
 ): T {
+  ensureInitialized();
   const sessionId = generateSessionId();
 
   return logContextStorage.run({ sessionId, reference: options.reference, depth: 1 }, () => {
@@ -62,6 +101,7 @@ export async function startSessionAsync<T>(
   options: { reference?: string; logger?: Logger },
   fn: () => Promise<T>
 ): Promise<T> {
+  ensureInitialized();
   const sessionId = generateSessionId();
 
   return logContextStorage.run({ sessionId, reference: options.reference, depth: 1 }, async () => {
@@ -88,6 +128,7 @@ export async function startSessionAsync<T>(
  * });
  */
 export function runWithLogContext<T>(context: LogContext, fn: () => T): T {
+  ensureInitialized();
   const parentContext = logContextStorage.getStore();
   const parentDepth = parentContext?.depth ?? 0;
 
@@ -116,6 +157,7 @@ export function runWithLogContextAsync<T>(
   context: LogContext,
   fn: () => Promise<T>
 ): Promise<T> {
+  ensureInitialized();
   const parentContext = logContextStorage.getStore();
   const parentDepth = parentContext?.depth ?? 0;
 
@@ -133,6 +175,7 @@ export function runWithLogContextAsync<T>(
  * Returns undefined if not within a context
  */
 export function getLogContext(): LogContext | undefined {
+  ensureInitialized();
   return logContextStorage.getStore();
 }
 

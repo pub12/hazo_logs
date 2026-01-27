@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { PackageLogger, createLogger } from '../lib/package_logger.js';
 import { HazoLogger } from '../lib/hazo_logger.js';
 import fs from 'fs';
@@ -8,7 +8,7 @@ describe('PackageLogger', () => {
   const testConfigPath = path.join(process.cwd(), 'test_hazo_logs_config.ini');
   const testLogDir = path.join(process.cwd(), 'test-logs');
 
-  beforeEach(() => {
+  beforeEach(async () => {
     HazoLogger.reset();
 
     // Create a config that disables file output to avoid file system side effects
@@ -20,7 +20,7 @@ enable_console = false
 enable_file = false
 `;
     fs.writeFileSync(testConfigPath, testConfig);
-    HazoLogger.getInstance(testConfigPath);
+    await HazoLogger.getInstanceAsync(testConfigPath);
   });
 
   afterEach(() => {

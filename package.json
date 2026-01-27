@@ -56,6 +56,9 @@
   ],
   "author": "Pubs Abayasiri",
   "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "bugs": {
     "url": "https://github.com/pub12/hazo_logs/issues"
   },

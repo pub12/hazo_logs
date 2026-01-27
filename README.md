@@ -185,6 +185,8 @@ import { createLogApiHandler } from 'hazo_logs/ui/server';
 
 **Note**: The `hazo_logs/server` and `hazo_logs/ui/server` imports use the `server-only` package and will throw an error if accidentally imported in client bundles. This prevents Next.js build errors from Node.js APIs (`fs`, `async_hooks`) being bundled for the browser.
 
+**Next.js 16 Turbopack Compatibility**: As of v1.0.9, hazo_logs is fully compatible with Next.js 16 Turbopack. All server-only modules are lazy-loaded to prevent static analysis issues during bundling.
+
 ### Tailwind CSS Setup Required
 
 The log viewer UI uses dynamic Tailwind classes that would be purged during build. You **must** configure both:
@@ -526,11 +528,14 @@ Error: Module not found: Can't resolve 'async_hooks'
 Error: Module not found: Can't resolve 'fs'
 ```
 
-This happens when server-only code is imported in client components. Solutions:
+This error occurred in earlier versions when server-only code was imported in client components. **As of v1.0.9, this is fixed** - the library now uses lazy loading for all server-only modules, making it fully compatible with Next.js 16 Turbopack.
 
-1. **For logging in client components**: Use `createClientLogger` from `hazo_logs/ui`
-2. **For server-only modules**: Import from `hazo_logs/server` instead of `hazo_logs`
-3. **For universal code**: The base `hazo_logs` import now works on both client and server (returns console logger on client)
+If you still see this error:
+
+1. **Upgrade hazo_logs**: Run `npm update hazo_logs` to get the latest version
+2. **For logging in client components**: Use `createClientLogger` from `hazo_logs/ui`
+3. **For server-only modules**: Import from `hazo_logs/server` instead of `hazo_logs`
+4. **For universal code**: The base `hazo_logs` import works on both client and server (returns console logger on client)
 
 ### hazo_ui missing errors
 

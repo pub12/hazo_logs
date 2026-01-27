@@ -820,6 +820,13 @@ docker-compose exec app ls -la /app/logs
 
 #### Issue: "Module not found: Can't resolve 'async_hooks'" or "fs" errors
 
+**Note**: As of v1.0.9, this issue is fixed. The library now uses lazy loading for all server-only modules, making it fully compatible with Next.js 16 Turbopack.
+
+- [ ] **First, upgrade hazo_logs**:
+  ```bash
+  npm update hazo_logs
+  ```
+
 - [ ] **Check import paths for client components**:
   - The root `hazo_logs` import now works on both client and server
   - For full server features, use `hazo_logs/server`
@@ -839,6 +846,7 @@ docker-compose exec app ls -la /app/logs
 - [ ] **Check for indirect imports**:
   - If a dependency imports from `hazo_logs/server` in client code, it will fail
   - Ensure server-only code paths use proper import separation
+  - Update dependency packages that use hazo_logs to their latest versions
 
 ---
 

@@ -23,22 +23,22 @@ describe('HazoLogger', () => {
     }
   });
 
-  it('should be a singleton', () => {
-    const instance1 = HazoLogger.getInstance();
-    const instance2 = HazoLogger.getInstance();
+  it('should be a singleton', async () => {
+    const instance1 = await HazoLogger.getInstanceAsync();
+    const instance2 = await HazoLogger.getInstanceAsync();
 
     expect(instance1).toBe(instance2);
   });
 
-  it('should reset singleton correctly', () => {
-    const instance1 = HazoLogger.getInstance();
+  it('should reset singleton correctly', async () => {
+    const instance1 = await HazoLogger.getInstanceAsync();
     HazoLogger.reset();
-    const instance2 = HazoLogger.getInstance();
+    const instance2 = await HazoLogger.getInstanceAsync();
 
     expect(instance1).not.toBe(instance2);
   });
 
-  it('should load config from specified path', () => {
+  it('should load config from specified path', async () => {
     const testConfig = `
 [hazo_logs]
 log_directory = ./test-logs
@@ -48,14 +48,14 @@ enable_file = false
 `;
     fs.writeFileSync(testConfigPath, testConfig);
 
-    const instance = HazoLogger.getInstance(testConfigPath);
+    const instance = await HazoLogger.getInstanceAsync(testConfigPath);
     const config = instance.getConfig();
 
     expect(config.log_directory).toBe('./test-logs');
     expect(config.log_level).toBe('debug');
   });
 
-  it('should log entries correctly', () => {
+  it('should log entries correctly', async () => {
     const testConfig = `
 [hazo_logs]
 log_directory = ./test-logs
@@ -65,7 +65,7 @@ enable_file = true
 `;
     fs.writeFileSync(testConfigPath, testConfig);
 
-    const instance = HazoLogger.getInstance(testConfigPath);
+    const instance = await HazoLogger.getInstanceAsync(testConfigPath);
 
     // This should not throw
     expect(() => {
