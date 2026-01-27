@@ -820,31 +820,41 @@ docker-compose exec app ls -la /app/logs
 
 #### Issue: "Module not found: Can't resolve 'async_hooks'" or "fs" errors
 
-**Note**: As of v1.0.9, this issue is fixed. The library now uses lazy loading for all server-only modules, making it fully compatible with Next.js 16 Turbopack.
+**Note**: As of v1.0.10, this issue is fully fixed. The library now uses **conditional exports** in `package.json`, so bundlers automatically receive a client-safe bundle with zero Node.js dependencies.
 
-- [ ] **First, upgrade hazo_logs**:
+- [ ] **First, upgrade hazo_logs to v1.0.10 or later**:
   ```bash
   npm update hazo_logs
   ```
 
-- [ ] **Check import paths for client components**:
-  - The root `hazo_logs` import now works on both client and server
-  - For full server features, use `hazo_logs/server`
-  - For client components, use `hazo_logs/ui` for `createClientLogger`
+- [ ] **Clear build cache**:
+  ```bash
+  rm -rf .next
+  npm run build
+  ```
+
+- [ ] **Understanding how it works**:
+  - When bundlers resolve `hazo_logs`, they check the `browser` condition in `package.json`
+  - Browser/client bundles receive `dist/client/index.js` (console-only, no Node.js deps)
+  - Node.js receives `dist/index.js` (full winston-based logging)
+  - This happens automatically - no special import paths needed for basic logging
 
   ```typescript
-  // Universal - works everywhere (basic logging)
+  // Universal - works everywhere (automatic client/server detection)
   import { createLogger } from 'hazo_logs';
 
-  // Server-only - full capabilities
+  // Server-only - full capabilities (file logging, sessions, context)
   import { createLogger, runWithLogContext } from 'hazo_logs/server';
 
-  // Client components - browser logging
+  // Client components - browser logging that posts to server API
   import { createClientLogger } from 'hazo_logs/ui';
+
+  // Explicit client import (if needed)
+  import { createLogger } from 'hazo_logs/client';
   ```
 
 - [ ] **Check for indirect imports**:
-  - If a dependency imports from `hazo_logs/server` in client code, it will fail
+  - If a dependency imports from `hazo_logs/server` in client code, it will still fail
   - Ensure server-only code paths use proper import separation
   - Update dependency packages that use hazo_logs to their latest versions
 

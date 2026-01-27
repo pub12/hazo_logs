@@ -185,14 +185,32 @@ import { createLogApiHandler } from 'hazo_logs/ui/server';
 
 **Note**: The `hazo_logs/server` and `hazo_logs/ui/server` imports use the `server-only` package and will throw an error if accidentally imported in client bundles. This prevents Next.js build errors from Node.js APIs (`fs`, `async_hooks`) being bundled for the browser.
 
-**Next.js 16 Turbopack Compatibility**: As of v1.0.9, hazo_logs is fully compatible with Next.js 16 Turbopack. All server-only modules are lazy-loaded to prevent static analysis issues during bundling.
+**Next.js 16+ Turbopack Compatibility**: As of v1.0.10, hazo_logs uses **conditional exports** in `package.json` to automatically serve a client-safe bundle to browser environments. When bundlers (Next.js Turbopack, Webpack, etc.) resolve `hazo_logs`, they automatically receive:
+- **Browser/Client**: A lightweight console-only logger with zero Node.js dependencies
+- **Node.js/Server**: The full winston-based logger with file transports
+
+This eliminates "Can't resolve 'fs'" errors completely without requiring any special import paths for basic logging.
 
 ### Tailwind CSS Setup Required
 
-The log viewer UI uses dynamic Tailwind classes that would be purged during build. You **must** configure both:
+The log viewer UI uses dynamic Tailwind classes that would be purged during build.
 
-1. **Content path**: So Tailwind scans the hazo_logs component files
-2. **Safelist**: To preserve dynamically-constructed classes
+#### Tailwind v4 Setup
+
+Add the `@source` directive to your `globals.css` to enable Tailwind to scan hazo_logs classes:
+
+```css
+@import "tailwindcss";
+
+/* Required: Enable Tailwind to scan hazo_logs package classes */
+@source "../node_modules/hazo_logs/dist";
+```
+
+**Why this is needed:** Tailwind v4's JIT compiler doesn't scan `node_modules/` by default. Without this directive, hover states and interactive styles will be invisible.
+
+#### Tailwind v3 Setup
+
+Configure both the content path and safelist:
 
 ```typescript
 import { tailwindSafelist, tailwindContentPath } from 'hazo_logs/tailwind';
@@ -528,14 +546,15 @@ Error: Module not found: Can't resolve 'async_hooks'
 Error: Module not found: Can't resolve 'fs'
 ```
 
-This error occurred in earlier versions when server-only code was imported in client components. **As of v1.0.9, this is fixed** - the library now uses lazy loading for all server-only modules, making it fully compatible with Next.js 16 Turbopack.
+This error occurred in earlier versions when server-only code was imported in client components. **As of v1.0.10, this is fully fixed** - the library now uses **conditional exports** in `package.json`, so bundlers automatically receive a client-safe bundle with zero Node.js dependencies.
 
 If you still see this error:
 
-1. **Upgrade hazo_logs**: Run `npm update hazo_logs` to get the latest version
-2. **For logging in client components**: Use `createClientLogger` from `hazo_logs/ui`
-3. **For server-only modules**: Import from `hazo_logs/server` instead of `hazo_logs`
-4. **For universal code**: The base `hazo_logs` import works on both client and server (returns console logger on client)
+1. **Upgrade hazo_logs**: Run `npm update hazo_logs` to get v1.0.10 or later
+2. **Clear build cache**: Run `rm -rf .next` and rebuild
+3. **For logging in client components**: The base `hazo_logs` import now works automatically (returns console logger on client)
+4. **For client logging that posts to server**: Use `createClientLogger` from `hazo_logs/ui`
+5. **For full server capabilities**: Import from `hazo_logs/server` for file logging, sessions, and context
 
 ### hazo_ui missing errors
 
